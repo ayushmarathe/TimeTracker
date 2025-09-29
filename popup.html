@@ -1,16 +1,65 @@
-<!DOCTYPE html> 
-<html>
-    <head>
-        <title>Web Time Tracker</title>
-        <link rel="stylesheet" href="styles.css">
-    </head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Tracker Stats</title>
+    <link rel = "stylesheet" href="styles.css" >
+    <style>
+        body {
+            width: 350px;
+            font-family: sans-serif;
+            text-align: center;
+            padding: 8px;
+        }
+        #active-site-container {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        #active-site-container p { margin: 0; }
+        .details-list p { text-align: left; margin: 4px 10px; }
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            border-top: 1px solid #eee;
+            padding-top: 10px;
+        }
+        .view-button {
+            background: none;
+            border: none;
+            color: #36A2EB;
+            cursor: pointer;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="active-site-container">
+        <p>Currently on:</p>
+        <h3 id="active-domain">Loading...</h3>
+        <p id="active-time">Time today: 0m</p>
+    </div>
+    
+    <div style="width: 90%; margin: 0 auto;">
+        <canvas id="chart"></canvas>
+    </div>
 
-    <body>
-        <h3>Screen Time Today</h3>
-        <div id="stats" ></div>
-        <canvas id="chart" width= "250" height= "250"></canvas>
+    <div class="button-container">
+        <button id="view-all-btn" class="view-button">View All Today</button>
+        <button id="view-recent-btn" class="view-button">View Recent Days</button>
+    </div>
 
-        <script src="chart.js"></script>
-        <script src="popup.js" ></script>
-    </body>
+    <div id="stats-today" class="details-list" style="display: none;">
+        <h3>Today's Stats</h3>
+    </div>
+    <div id="stats-recent" class="details-list" style="display: none;">
+        <h3>Recent Days</h3>
+    </div>
+
+    <script src="chart.umd.min.js"></script>
+    <script src="popup.js"></script>
+</body>
 </html>
