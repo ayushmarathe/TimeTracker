@@ -10,7 +10,7 @@ function getDomain(url) {
     catch (error) { return null; }
 }
 
-// THIS FUNCTION IS THE FIX - It now uses your local timezone.
+
 function getCurrentDateKey() {
     const now = new Date();
     const year = now.getFullYear();
