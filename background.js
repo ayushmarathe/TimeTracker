@@ -10,17 +10,20 @@ function getDomain(url) {
     catch (error) { return null; }
 }
 
+// THIS FUNCTION IS THE FIX - It now uses your local timezone.
 function getCurrentDateKey() {
-    return new Date().toISOString().split('T')[0];
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 async function saveActiveSession() {
     const { activeSession } = await chrome.storage.local.get(STORAGE_KEY_ACTIVE_SESSION);
-
     if (!activeSession || !activeSession.domain || !activeSession.startTime) {
         return;
     }
-
     const timeSpent = Math.floor((Date.now() - activeSession.startTime) / 1000);
     if (timeSpent <= 0) return;
 
@@ -37,7 +40,6 @@ async function saveActiveSession() {
 async function startNewSession(tab) {
     await saveActiveSession();
     const domain = tab ? getDomain(tab.url) : null;
-
     if (domain) {
         const newSession = { domain: domain, startTime: Date.now() };
         await chrome.storage.local.set({ [STORAGE_KEY_ACTIVE_SESSION]: newSession });
