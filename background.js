@@ -10,12 +10,10 @@ function getDomain(url) {
     catch (error) { return null; }
 }
 
-
-function getCurrentDateKey() {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
+function getLocalDateKey(date = new Date()) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 }
 
@@ -27,7 +25,7 @@ async function saveActiveSession() {
     const timeSpent = Math.floor((Date.now() - activeSession.startTime) / 1000);
     if (timeSpent <= 0) return;
 
-    const dateKey = getCurrentDateKey();
+    const dateKey = getLocalDateKey();
     const { [dateKey]: todaysData = {} } = await chrome.storage.local.get(dateKey);
 
     const previousTime = todaysData[activeSession.domain] || 0;
@@ -38,7 +36,21 @@ async function saveActiveSession() {
 }
 
 async function startNewSession(tab) {
-    await saveActiveSession();
+    const { activeSession } = await chrome.storage.local.get(STORAGE_KEY_ACTIVE_SESSION);
+    if (activeSession && activeSession.startTime) {
+        const sessionDateKey = getLocalDateKey(new Date(activeSession.startTime));
+        const todayKey = getLocalDateKey();
+
+        if (sessionDateKey === todayKey) {
+            // If the session is from today, it's valid. Save it.
+            await saveActiveSession();
+        } else {
+            // If the session is from a previous day, it's stale. Discard it.
+            console.log(`${LOG_PREFIX} Discarding stale session from ${sessionDateKey}`);
+        }
+    }
+    // --- END OF FIX ---
+
     const domain = tab ? getDomain(tab.url) : null;
     if (domain) {
         const newSession = { domain: domain, startTime: Date.now() };
@@ -55,6 +67,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === ALARM_NAME_PERIODIC_SAVE) {
+        // We call startNewSession which now contains the logic to handle stale sessions
         const { activeSession } = await chrome.storage.local.get(STORAGE_KEY_ACTIVE_SESSION);
         if (activeSession) {
             startNewSession({ url: `http://${activeSession.domain}` });
